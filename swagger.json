@@ -1,0 +1,344 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "A feedback service",
+    "description": "A service that allows players of an online game to submit feedback for their last game session, and allows members of an operations team to view the feedback.",
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/IvanOliinychenko/feedback-demo"
+    }
+  },
+  "host": "localhost:3000",
+  "basePath": "/api/v1",
+  "securityDefinitions": {
+    "OAuth2": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "api/v1/auth",
+      "tokenUrl": "api/v1/token",
+      "description": "Custom oauth2 with one request for authentication and grant type - 'demo'",
+      "scopes": {
+        "read": "Grants access to read information",
+        "write": "Grants access to write information",
+        "modify": "Grants access to modify information",
+        "admin": "Grant access to admin only"
+      }
+    }
+  },
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "responses": {
+    "BadRequest": {
+      "description": "Bad entity syntax.",
+      "schema": {
+        "$ref": "#/definitions/ErrorMessage"
+      }
+    },
+    "UnprocessableEntity": {
+      "description": "Syntax of the request entity is correct but was unable to process the contained instructions.",
+      "schema": {
+        "$ref": "#/definitions/ErrorMessage"
+      }
+    },
+    "Unauthorized": {
+      "description": "Access token is missing or invalid.",
+      "schema": {
+        "$ref": "#/definitions/ErrorMessage"
+      }
+    },
+    "Forbidden": {
+      "description": "Not enough permissions to access the resource.",
+      "schema": {
+        "$ref": "#/definitions/ErrorMessage"
+      }
+    },
+    "NotFound": {
+      "description": "Resource is missing or invalid.",
+      "schema": {
+        "$ref": "#/definitions/ErrorMessage"
+      }
+    },
+    "InternalServerError": {
+      "description": "Unexpected server error. Contact support if the error persists.",
+      "schema": {
+        "$ref": "#/definitions/ErrorMessage"
+      }
+    },
+    "ServiceUnavailable": {
+      "description": "Service is temporarily unavailable, please try later.",
+      "schema": {
+        "$ref": "#/definitions/ErrorMessage"
+      }
+    }
+  },
+  "paths": {
+    "/feedback": {
+      "post": {
+        "summary": "Create new feedback",
+        "security": [
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "feedback",
+            "in": "body",
+            "description": "Feedback content",
+            "schema": {
+              "$ref": "#/definitions/Feedback"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "New feedback is created",
+            "schema": {
+              "$ref": "#/definitions/Feedback"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/responses/InternalServerError"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all feedbacks in system",
+        "security": [
+          {
+            "OAuth2": [
+              "admin"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Feedback"
+            }
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/feedback/{feedbackId}": {
+      "parameters": [
+        {
+          "name": "feedbackId",
+          "in": "path",
+          "required": true,
+          "description": "ID of feedback that we want to get",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "summary": "Get feedback with given ID",
+        "security": [
+          {
+            "OAuth2": [
+              "read"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback is found",
+            "schema": {
+              "$ref": "#/definitions/Feedback"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete feedback with given ID",
+        "security": [
+          {
+            "OAuth2": [
+              "modify"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback is deleted",
+            "schema": {
+              "$ref": "#/definitions/Feedback"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update feedback with give ID",
+        "security": [
+          {
+            "OAuth2": [
+              "admin"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "feedback",
+            "in": "body",
+            "description": "New feedback content",
+            "schema": {
+              "$ref": "#/definitions/Feedback"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback is updated",
+            "schema": {
+              "$ref": "#/definitions/Feedback"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Feedback": {
+      "required": [
+        "scale",
+        "playerId",
+        "sessionId"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "uniqueItems": true
+        },
+        "playerId": {
+          "type": "integer",
+          "uniqueItems": true
+        },
+        "sessionId": {
+          "type": "integer",
+          "uniqueItems": true
+        },
+        "scale": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        "comment": {
+          "type": "string"
+        }
+      },
+      "description": "A session rating"
+    },
+    "ErrorMessage": {
+      "description": "The message sent when an error occurs with the server. In some rare cases, a request can fail without including this error message.\n",
+      "type": "object",
+      "required": [
+        "message",
+        "code"
+      ],
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "A description of what went wrong. Intended for developer use only."
+        },
+        "code": {
+          "type": "integer",
+          "description": "The HTTP error code of the request.",
+          "minimum": 400,
+          "maximum": 600
+        }
+      },
+      "example": {
+        "code": 500,
+        "message": "An error occured"
+      }
+    }
+  }
+}
