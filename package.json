@@ -1,11 +1,13 @@
 {
   "name": "feedback-demo",
   "version": "1.0.0",
+  "private": true,
   "description": "A service that allows players of an online game to sumbit feedback for their last game session, and allows members of an operations team to view the feedback.",
   "main": "app.js",
   "scripts": {
-    "prod": "cross-env NODE_ENV=prod node app.js",
-    "dev": "cross-env NODE_ENV=dev node app.js",
+    "postinstall": "node create-dev-db.js",
+    "prod": "cross-env NODE_ENV=production node ./bin/www",
+    "dev": "cross-env DEBUG=* NODE_ENV=dev node ./bin/www",
     "pretest": "eslint --ignore-path .gitignore .",
     "test": "test"
   },
@@ -14,7 +16,8 @@
     "url": "git+https://github.com/IvanOliinychenko/feedback-demo.git"
   },
   "keywords": [
-    "feedback"
+    "feedback",
+    "feedback-demo"
   ],
   "author": "Ivan Oliinychenko",
   "license": "MIT",
@@ -23,8 +26,16 @@
   },
   "homepage": "https://github.com/IvanOliinychenko/feedback-demo#readme",
   "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "cors": "^2.8.5",
+    "debug": "~2.6.9",
     "express": "^4.16.4",
+    "express-validator": "^5.3.1",
+    "knex": "^0.16.5",
+    "moment": "^2.24.0",
+    "morgan": "~1.9.1",
     "mysql": "^2.17.1",
+    "node-sass-middleware": "0.11.0",
     "swagger-ui-express": "^4.0.3"
   },
   "devDependencies": {

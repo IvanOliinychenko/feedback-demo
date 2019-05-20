@@ -9,18 +9,70 @@ info:
 host: 'localhost:3000'
 basePath: /api/v1
 securityDefinitions:
-  # must be real OAuth2 in prod
+  # must be implicit OAuth2 in prod
   OAuth2:
     type: oauth2
-    flow: accessCode
+    flow: implicit
     authorizationUrl: api/v1/auth
-    tokenUrl: api/v1/token
-    description: Custom oauth2 with one request for authentication and grant type - 'demo'
+    description: Implicit oauth2 flow with one request for authentication and grant type - 'implicit'
     scopes:
       read: Grants access to read information
       write: Grants access to write information
       modify: Grants access to modify information
       admin: Grant access to admin only
+parameters:
+  Order:
+    in: query
+    name: order
+    required: false
+    type: string
+    enum: ['asc', 'des']
+    description: Order of the pagination.
+  StartDate:
+    in: query
+    name: startDate
+    required: false
+    type: string
+    description: Start date filter for pagination. Should be bigger or equal to end timestamp if used. Is ISO 8601 UTC timestamp.
+  EndDate:
+    in: query
+    name: endDate
+    required: false
+    type: string
+    description: End date filter for pagination. Should be smaller or equal then start timestamp if used. Is ISO 8601 UTC timestamp.
+  MinRating:
+    in: query
+    name: minRating
+    required: false
+    type: integer
+    minimum: 1
+    maximum: 5
+    description: Min filter for rating in pagination. Should be smaller or equal then max filter if used. 
+  MaxRating:
+    in: query
+    name: maxRating
+    required: false
+    type: integer
+    minimum: 1
+    maximum: 5
+    description: Max filter for rating in pagination. Should be bigger or equal to min if used.
+  Limit:
+    in: query
+    name: limit
+    required: false
+    type: integer
+    minimum: 1
+    maximum: 100
+    default: 20
+    description: The numbers of items to return for pagination.
+  Offset:
+    in: query
+    name: offset
+    required: false
+    type: integer
+    minimum: 0
+    default: 0
+    description: The number of items to skip before starting to collect the result set for pagination.
 schemes:
   # must be https in prod
   - http
@@ -29,6 +81,8 @@ consumes:
 produces:
   - application/json
 responses:
+  NoContent:
+    description: Entity was successfully removed.
   BadRequest:
     description: Bad entity syntax.
     schema:
@@ -91,9 +145,21 @@ paths:
       summary: Get all feedbacks in system
       security:
         - OAuth2: [admin]
+      parameters:
+        - $ref: '#/parameters/Order'
+        - $ref: '#/parameters/StartDate'
+        - $ref: '#/parameters/EndDate'
+        - $ref: '#/parameters/MinRating'
+        - $ref: '#/parameters/MaxRating'
+        - $ref: '#/parameters/Limit'
+        - $ref: '#/parameters/Offset'
       responses:
         '200':
           description: OK
+          headers:
+            X-Total:
+              type: integer
+              description: Total amount of recourds for pagination.
           schema:
             $ref: '#/definitions/Feedback'
         '401':
@@ -162,6 +228,8 @@ paths:
           description: Feedback is updated
           schema:
             $ref: '#/definitions/Feedback'
+        '204':
+          $ref: '#/responses/NoContent'
         '400':
           $ref: '#/responses/BadRequest'
         '401':
@@ -177,23 +245,23 @@ paths:
 definitions:
   Feedback:
     required:
-      - scale
-      - playerId
-      - sessionId
+      - rating
+      - playerSessionId
     properties:
       id:
         type: integer
         uniqueItems: true
-      playerId:
+      playerSessionId:
         type: integer
         uniqueItems: true
-      sessionId:
-        type: integer
-        uniqueItems: true
-      scale:
+      rating:
         type: integer
         enum: [1, 2, 3, 4, 5]
       comment:
+        type: string
+      createdAt:
+        type: string
+      updatedAt:
         type: string
     description: A session rating
   ErrorMessage:
@@ -204,17 +272,16 @@ definitions:
     type: object
     required:
       - message
-      - code
+      - status
     properties:
       message:
         type: string
         description: A description of what went wrong. Intended for developer use only.
-      code:
+      status:
         type: integer
-        description: The HTTP error code of the request.
+        description: The HTTP error status code of the request.
         minimum: 400
-        maximum: 600
+        maximum: 500
     example:
-      code: 500
+      status: 500
       message: An error occured
-
