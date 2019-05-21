@@ -1,25 +1,24 @@
-==Description==
+==Description==<br>
 A service that allows players of an online game to submit feedback for their last game session, and allows members of an operations team to view the feedback.
 
-==Requirements==
+==Requirements==<br>
 - Node.js (LTS, Latest)
 - MYSQL (5.7+, must be up and running)
 - Configure db connection (host, user, password) in config.*.json
 - By default server will be running at http://localhost:3000
 - Use feedback-demo-client as Api client (separate project)
 
-==Run==
-dev version
+==Run==<br>
+dev version<br>
 >> npm run dev
 
-prod version
+prod version<br>
 >> npm run prod
 
-==Database==
+==Database==<br>
 Development database will be created automatically after npm install (if not already exist), this require MySQL server to be running.
 
-
-==Full Documentation==
+==Full Documentation==<br>
 Swagger (OpenApi) Api documentation
 >> /api/v1/docs
 
@@ -66,25 +65,25 @@ Users:
     Name: HODOR
     Password: HoldTheDoor
 
-==Deployment==
+==Deployment==<br>
 // TODO project build with gulp, use docker, create Postman requests collection with all endpoints
 
-==Tests==
+==Tests==<br>
 // TODO, cover all endpoints with unit tests
 
-To force create database if not exists
+To force create database if not exists<br>
 >> node create-dev-db.js
 
-Migrations engine
+Migrations engine<br>
 >> https://knexjs.org/
 
-Migrations
+Migrations<br>
 >> node_modules/.bin/knex init
 >> node_modules/.bin/knex migrate:make migration_name
 >> node_modules/.bin/knex migrate:latest
 >> node_modules/.bin/knex migrate:rollback
 
-Seed
+Seed<br>
 >> node_modules/.bin/knex seed:make seed_name
 >> node_modules/.bin/knex seed:run
 
