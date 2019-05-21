@@ -13,6 +13,3 @@ connection.query(`CREATE DATABASE IF NOT EXISTS \`${config.database}\``, functio
   console.log(`Database ${config.database} was succesfully created`);
 })
 connection.end();
-
-
-

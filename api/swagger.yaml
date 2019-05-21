@@ -12,9 +12,9 @@ securityDefinitions:
   # must be implicit OAuth2 in prod
   OAuth2:
     type: oauth2
-    flow: implicit
-    authorizationUrl: api/v1/auth
-    description: Implicit oauth2 flow with one request for authentication and grant type - 'implicit'
+    flow: password
+    tokenUrl: api/v1/signin
+    description: Password oauth2 flow with one request for authentication and grant type - 'password'
     scopes:
       read: Grants access to read information
       write: Grants access to write information
@@ -33,13 +33,13 @@ parameters:
     name: startDate
     required: false
     type: string
-    description: Start date filter for pagination. Should be bigger or equal to end timestamp if used. Is ISO 8601 UTC timestamp.
+    description: Start date filter for pagination. Should be bigger or equal to end timestamp if used. Is ISO 8601 timestamp.
   EndDate:
     in: query
     name: endDate
     required: false
     type: string
-    description: End date filter for pagination. Should be smaller or equal then start timestamp if used. Is ISO 8601 UTC timestamp.
+    description: End date filter for pagination. Should be smaller or equal then start timestamp if used. Is ISO 8601 timestamp.
   MinRating:
     in: query
     name: minRating
@@ -174,7 +174,7 @@ paths:
         in: path
         required: true
         description: ID of feedback that we want to get
-        type: string
+        type: integer
     get:
       summary: Get feedback with given ID
       security:
@@ -246,12 +246,12 @@ definitions:
   Feedback:
     required:
       - rating
-      - playerSessionId
+      - userSessionId
     properties:
       id:
         type: integer
         uniqueItems: true
-      playerSessionId:
+      userSessionId:
         type: integer
         uniqueItems: true
       rating:

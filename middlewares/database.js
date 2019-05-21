@@ -15,6 +15,7 @@ configuration.log = {
         },
     }
 };
+  
 var db = require('knex')(configuration);
 
 module.exports = function () {

@@ -1,7 +1,6 @@
 var express = require('express');
 var isAdmin = require('../middlewares/isAdmin');
 var isUser = require('../middlewares/isUser');
-var express = require('express');
 var validation = require('../middlewares/validation');
 var moment = require('moment');
 var {
@@ -24,13 +23,12 @@ router.get('/', [
   query('order').optional().isIn(['asc', 'des']),
   query('minRating').optional().isInt({gt: 0, lt: 6}),
   query('maxRating').optional().isInt({gt: 0, lt: 6}),
-  query('total').optional().isInt({gt: -1}),
   query('limit').optional().isInt({gt: -1, lt: 101}),
   query('offset').optional().isInt({gt: -1}),
-  query('startDate').optional().custom(function(value, req) { 
+  query('startDate').optional().custom(function(value) { 
     return moment(value).isValid();
   }),
-  query('endDate').optional().custom(function(value, req) { 
+  query('endDate').optional().custom(function(value) { 
     return moment(value).isValid();
   }),
   validation
@@ -38,8 +36,7 @@ router.get('/', [
 
 router.post('/', [
   isUser,
-  isAdmin,
-  body('playerSessionId').isInt(),
+  body('userSessionId').isInt(),
   body('rating').isInt({gt: 0, lt: 6}),
   body('comment').optional().isLength({max: 2000}),
   validation

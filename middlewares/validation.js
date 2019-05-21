@@ -7,5 +7,5 @@ var {
 module.exports = function (req, res, next) {
     const result = validationResult(req);
     if (result.isEmpty()) return next();
-    next(createError(UNPROCESSABLE, null, result.array()));
+    next(createError(UNPROCESSABLE, '', result.array()));
 };

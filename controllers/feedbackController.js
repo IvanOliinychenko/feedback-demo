@@ -8,8 +8,8 @@ var moment = require('moment');
 
 var getFeedbacks = function(req, res, next) {
   var order = req.query.order === 'des' ? 'desc' : 'asc';
-  var startDate = req.query.startDate ? moment.utc(req.query.startDate) : null;
-  var endDate = req.query.endDate ? moment.utc(req.query.endDate) : null;
+  var startDate = req.query.startDate ? moment(req.query.startDate) : null;
+  var endDate = req.query.endDate ? moment(req.query.endDate) : null;
   var minRating = req.query.minRating || 1;
   var maxRating = req.query.maxRating || 5;
   var limit = parseInt(req.query.limit) || 20;
@@ -32,13 +32,14 @@ var getFeedbacks = function(req, res, next) {
     
       return query.where({isActive: 1})
       .whereBetween('rating', [minRating, maxRating])
-      .select(['id', 'playerId', 'playerSessionId', 'comment', 'rating', 'createdAt', 'updatedAt'])
+      .select(['id', 'userId', 'userSessionId', 'comment', 'rating', 'createdAt', 'updatedAt'])
       .orderBy('createdAt', order)
       .limit(limit)
       .offset(offset)
         .then(function(row) {
           if (row) {
             res.set('X-Total', total[0].count);
+            res.set('X-Limit', limit);
             res.json(row);
           } else {
             next(createError(NOT_FOUND));
@@ -53,7 +54,7 @@ var getFeedback = function(req, res, next) {
   var feedbackId = req.params.feedbackId;
   res.db.from('feedback')
     .where({id: feedbackId, isActive: 1})
-    .first(['id', 'playerId', 'playerSessionId', 'comment', 'rating', 'createdAt', 'updatedAt'])
+    .first(['id', 'userId', 'userSessionId', 'comment', 'rating', 'createdAt', 'updatedAt'])
       .then(function(row) {
         if (row) {
           res.json(row);
@@ -66,32 +67,32 @@ var getFeedback = function(req, res, next) {
 
 var postFeedback = function(req, res, next) {
   var feedback = {
-    playerSessionId: req.body.playerSessionId,
+    userSessionId: req.body.userSessionId,
     rating: req.body.rating,
     comment: req.body.comment
   };
 
-  res.db.from('player_session').where({id: feedback.playerSessionId}).first('id', 'playerId')
-  .then(function(playerSessionResponse) {
-    if (!playerSessionResponse) throw next(createError(BAD_REQUEST, 'Invalid sessionId'));
-    feedback.playerId = playerSessionResponse.playerId;
+  res.db.from('user_session').where({id: feedback.userSessionId}).first('id', 'userId')
+  .then(function(userSessionResponse) {
+    if (!userSessionResponse) throw next(createError(BAD_REQUEST, 'Invalid sessionId'));
+    feedback.userId = userSessionResponse.userId;
     var createdFeedbackId = null;
     return res.db.transaction(function (t) {
       return res.db('feedback')
-      .insert(feedback)
       .transacting(t)
+      .insert(feedback)
       .then(function(insertFeedbackIdResponse) {
         createdFeedbackId = insertFeedbackIdResponse[0];
-        return res.db('player_session')
+        return res.db('user_session')
           .transacting(t)
-          .where({playerId: playerSessionResponse.playerId, id: feedback.playerSessionId})
+          .where({userId: userSessionResponse.userId, id: feedback.userSessionId})
           .update({feedbackId: createdFeedbackId})
       })
       .then(function() {
         return res.db.from('feedback')
           .transacting(t)
           .where({id: createdFeedbackId})
-          .first(['id', 'playerId', 'playerSessionId', 'comment', 'rating', 'createdAt', 'updatedAt'])
+          .first(['id', 'userId', 'userSessionId', 'comment', 'rating', 'createdAt', 'updatedAt'])
       })
       .then(t.commit)
       .catch(function(err) {
@@ -133,7 +134,7 @@ var putFeedback = function(req, res, next) {
     .then(function(feedbackId) {
       return res.db.from('feedback')
         .where({id: feedbackId})
-        .first(['id', 'playerId', 'playerSessionId', 'comment', 'rating', 'createdAt', 'updatedAt'])
+        .first(['id', 'userId', 'userSessionId', 'comment', 'rating', 'createdAt', 'updatedAt'])
     })
     .then(function (feedback) {
       res.json(feedback);

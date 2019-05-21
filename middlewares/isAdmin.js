@@ -1,46 +1,37 @@
+var {
+  createError,
+  FORBIDDEN,
+  UNAUTHORIZED
+} = require('../helpers/errorHelper');
+var {
+  ADMIN
+} = require('../helpers/roleHelper');
+var getBearerToken = require('../helpers/getBearerToken');
+
 module.exports = function (req, res, next) {
-    var authHeader = req.headers.authorization;
-
-
-
-    next();
-    return;
-
-
-    
-    
+    const authHeader = req.headers.authorization
+  
     if (!authHeader) {
-      return res.status(403).json({
-        status: 403,
-        message: 'Forbidden'
-      });
+      return next(createError(FORBIDDEN));
     } else {
-    //   const token = getBearerToken(authHeader)
-  
-    //   if (token) {
-    //     return verifyTokenAndGetUID(token)
-    //       .then((userId) => {
-    //       // ------------------------------------
-    //       // HI I'M THE UPDATED CODE BLOCK, LOOK AT ME
-    //       // ------------------------------------
-    //         res.locals.auth = {
-    //           userId
-    //         }
-    //         next()
-    //       })
-    //       .catch((err) => {
-    //         logger.logError(err)
-  
-    //         return res.status(401).json({
-    //           status: 401,
-    //           message: 'UNAUTHORIZED'
-    //         })
-    //       })
-    //   } else {
-    //     return res.status(403).json({
-    //       status: 403,
-    //       message: 'FORBIDDEN'
-    //     })
-    //   }
-    };
-  };
+      const token = getBearerToken(authHeader)
+      if (token) {
+        res.db.from('user')
+          .where({token: token, role: ADMIN})
+          .first('*')
+          .then(function(row) {
+            if (row) {
+              res.userId = row.id;
+              next();
+            } else {
+              next(createError(UNAUTHORIZED));
+            }
+          })
+          .catch(function () {
+            return next(createError(UNAUTHORIZED));
+          });
+      } else {
+        next(createError(FORBIDDEN));
+      }
+    }
+  }

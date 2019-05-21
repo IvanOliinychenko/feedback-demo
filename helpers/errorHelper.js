@@ -1,4 +1,4 @@
-var createError = function(status = 500, message = 'Internal Server Error', errors = []) {
+var createError = function(status = 500, message, errors = []) {
   var error = new Error(message);
   error.status = status;
   error.errors = errors;
